@@ -1,0 +1,49 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        REACT_APP_PRODUCT_API_URL: ${REACT_APP_PRODUCT_API_URL:-http://localhost:6100}
+        REACT_APP_INVENTORY_API_URL: ${REACT_APP_INVENTORY_API_URL:-http://localhost:5000}
+        REACT_APP_API_KEY: ${REACT_APP_API_KEY:-}
+        REACT_APP_APPINSIGHTS_CONNECTION_STRING: ${REACT_APP_APPINSIGHTS_CONNECTION_STRING:-}
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+    depends_on:
+      inventory-api:
+        condition: service_healthy
+      product-service:
+        condition: service_healthy
+
+  inventory-api:
+    build: ./inventory-api
+    ports:
+      - "5000:5000"
+    environment:
+      API_KEY: ${API_KEY:?Set API_KEY in .env}
+      AZURE_STORAGE_CONNECTION_STRING: ${AZURE_STORAGE_CONNECTION_STRING:-}
+      QUEUE_NAME: ${QUEUE_NAME:-stock-events}
+      LOW_STOCK_THRESHOLD: ${LOW_STOCK_THRESHOLD:-10}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+      APPLICATIONINSIGHTS_CONNECTION_STRING: ${APPLICATIONINSIGHTS_CONNECTION_STRING:-}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:5000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  product-service:
+    build: ./product-service
+    ports:
+      - "6100:6000"
+    environment:
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+      APPLICATIONINSIGHTS_CONNECTION_STRING: ${APPLICATIONINSIGHTS_CONNECTION_STRING:-}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:6000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 3

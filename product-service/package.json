@@ -1,0 +1,14 @@
+{
+  "name": "product-service",
+  "version": "1.1.0",
+  "description": "Read-only product catalog API",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "applicationinsights": "^3.7.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}

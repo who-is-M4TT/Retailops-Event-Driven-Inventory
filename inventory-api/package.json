@@ -1,0 +1,15 @@
+{
+  "name": "inventory-api",
+  "version": "1.1.0",
+  "description": "Stock levels API that publishes low-stock events to an Azure Storage Queue",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@azure/storage-queue": "^12.27.0",
+    "applicationinsights": "^3.7.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}
